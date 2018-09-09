@@ -157,7 +157,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	}
 
 	/*
-	 * Creating a inventory
+	 * Creating a Inventory_Food
 	 */
 	public long createInventoryFood(int inventoryId, int foodId, int amount) {
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -171,6 +171,62 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 		return id;
 	}
+
+	/*
+	 * Creating a FoodIn
+	 */
+	public long createFoodIn(int inventoryFoodId, Date waktu, int amount) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String date = sdf.format(waktu);
+
+		SQLiteDatabase db = this.getWritableDatabase();
+
+		ContentValues values = new ContentValues();
+		values.put(TABLE_INVENTORY_FOOD + KEY_ID, inventoryFoodId);
+		values.put(KEY_TIME, date);
+		values.put(KEY_AMOUNT, amount);
+
+		long id = db.insert(TABLE_FOODIN, null, values);
+
+		return id;
+	}
+	/*
+	 * Creating a FoodOut
+	 */
+	public long createFoodOut(int inventoryFoodId, Date waktu, int amount) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String date = sdf.format(waktu);
+
+		SQLiteDatabase db = this.getWritableDatabase();
+
+		ContentValues values = new ContentValues();
+		values.put(TABLE_INVENTORY_FOOD + KEY_ID, inventoryFoodId);
+		values.put(KEY_TIME, date);
+		values.put(KEY_AMOUNT, amount);
+
+		long id = db.insert(TABLE_FOODOUT, null, values);
+
+		return id;
+	}
+	/*
+	 * Creating a FoodOut
+	 */
+	public long createFoodReduce(int inventoryFoodId, Date waktu, int amount) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String date = sdf.format(waktu);
+
+		SQLiteDatabase db = this.getWritableDatabase();
+
+		ContentValues values = new ContentValues();
+		values.put(TABLE_INVENTORY_FOOD + KEY_ID, inventoryFoodId);
+		values.put(KEY_TIME, date);
+		values.put(KEY_AMOUNT, amount);
+
+		long id = db.insert(TABLE_FOODREDUCE, null, values);
+
+		return id;
+	}
+
 	/*
 	 * Creating a inventory
 	 */
@@ -393,6 +449,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.delete(TABLE_FOOD, KEY_ID + " = ?",
 				new String[] { String.valueOf(id) });
+	}
+
+	public long getInventoryId(long inventoryId, long foodId)
+	{
+		SQLiteDatabase db = this.getReadableDatabase();
+		String selectQuery = "SELECT  * FROM " + TABLE_INVENTORY_FOOD + " WHERE "
+				+ TABLE_INVENTORY + KEY_ID + " = " + inventoryId
+				+ " AND " + TABLE_FOOD + KEY_ID + " = " + foodId;
+
+		Log.e(LOG, selectQuery);
+
+		Cursor c = db.rawQuery(selectQuery, null);
+		if(c.getCount() > 0)
+		{
+			c.moveToFirst();
+			return c.getInt(c.getColumnIndex(CREATE_TABLE_INVENTORY_FOOD + KEY_ID));
+		}
+
+		return -1;
 	}
 
 	// closing database

@@ -1,132 +1,234 @@
 package com.dedek.lelemas;
 
-import com.dedek.lelemas.helper.DatabaseHelper;
-import com.dedek.lelemas.model.Food;
-import com.dedek.lelemas.model.Todo;
+import android.app.Fragment;
+import android.content.Loader;
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.widget.LinearLayout;
 
+import com.dedek.lelemas.fragment.ContentFragment;
+import com.dedek.lelemas.fragment.MainFragment;
+import com.dedek.lelemas.helper.DatabaseHelper;
+
+import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.util.Log;
+import io.codetail.animation.SupportAnimator;
+import io.codetail.animation.ViewAnimationUtils;
+import yalantis.com.sidemenu.interfaces.Resourceble;
+import yalantis.com.sidemenu.interfaces.ScreenShotable;
+import yalantis.com.sidemenu.model.SlideMenuItem;
+import yalantis.com.sidemenu.util.ViewAnimator;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity implements ViewAnimator.ViewAnimatorListener {
+	private DrawerLayout drawerLayout;
+	private ActionBarDrawerToggle drawerToggle;
+	private List<SlideMenuItem> list = new ArrayList<>();
+	private ContentFragment contentFragment;
+	private ViewAnimator viewAnimator;
+	private int res = R.drawable.content_music;
+	private int res_fragment = R.layout.fragment_main;
+	private LinearLayout linearLayout;
 
-	// Database Helper
-	DatabaseHelper db;
+    // Database Helper
+    DatabaseHelper db;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		contentFragment = ContentFragment.newInstance(R.drawable.content_music);
+		getSupportFragmentManager().beginTransaction()
+				.replace(R.id.content_frame, contentFragment)
+				.commit();
+		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		drawerLayout.setScrimColor(Color.TRANSPARENT);
+		linearLayout = (LinearLayout) findViewById(R.id.left_drawer);
+		linearLayout.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				drawerLayout.closeDrawers();
+                Log.i("Drawer", "Onclick");
+			}
+		});
 
-		db = new DatabaseHelper(getApplicationContext());
+        db = new DatabaseHelper(getApplicationContext());
 
-		// Creating tags
-		Food food1 = new Food("Shopping");
-		Food food2 = new Food("Important");
-		Food food3 = new Food("Watchlist");
-		Food food4 = new Food("Androidhive");
+		setActionBar();
+		createMenuList();
+		viewAnimator = new ViewAnimator<>(this, list, contentFragment, drawerLayout, this);
+	}
 
-		// Inserting tags in db
-		long tag1_id = db.createTag(food1);
-		long tag2_id = db.createTag(food2);
-		long tag3_id = db.createTag(food3);
-		long tag4_id = db.createTag(food4);
+	private void createMenuList() {
+		SlideMenuItem menuItem0 = new SlideMenuItem(ContentFragment.CLOSE, R.drawable.icn_close);
+		list.add(menuItem0);
+		SlideMenuItem menuItem = new SlideMenuItem(ContentFragment.BUILDING, R.drawable.icn_1);
+		list.add(menuItem);
+		SlideMenuItem menuItem2 = new SlideMenuItem(ContentFragment.BOOK, R.drawable.icn_2);
+		list.add(menuItem2);
+		SlideMenuItem menuItem3 = new SlideMenuItem(ContentFragment.PAINT, R.drawable.icn_3);
+		list.add(menuItem3);
+		SlideMenuItem menuItem4 = new SlideMenuItem(ContentFragment.CASE, R.drawable.icn_4);
+		list.add(menuItem4);
+		SlideMenuItem menuItem5 = new SlideMenuItem(ContentFragment.SHOP, R.drawable.icn_5);
+		list.add(menuItem5);
+		SlideMenuItem menuItem6 = new SlideMenuItem(ContentFragment.PARTY, R.drawable.icn_6);
+		list.add(menuItem6);
+		SlideMenuItem menuItem7 = new SlideMenuItem(ContentFragment.MOVIE, R.drawable.icn_7);
+		list.add(menuItem7);
+	}
 
-		Log.d("Food Count", "Food Count: " + db.getAllTags().size());
 
-		// Creating ToDos
-		Todo todo1 = new Todo("iPhone 5S", 0);
-		Todo todo2 = new Todo("Galaxy Note II", 0);
-		Todo todo3 = new Todo("Whiteboard", 0);
+	private void setActionBar() {
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+		getSupportActionBar().setHomeButtonEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		drawerToggle = new ActionBarDrawerToggle(
+				this,                  /* host Activity */
+				drawerLayout,         /* DrawerLayout object */
+				toolbar,  /* nav drawer icon to replace 'Up' caret */
+				R.string.drawer_open,  /* "open drawer" description */
+				R.string.drawer_close  /* "close drawer" description */
+		) {
 
-		Todo todo4 = new Todo("Riddick", 0);
-		Todo todo5 = new Todo("Prisoners", 0);
-		Todo todo6 = new Todo("The Croods", 0);
-		Todo todo7 = new Todo("Insidious: Chapter 2", 0);
+			/** Called when a drawer has settled in a completely closed state. */
+			public void onDrawerClosed(View view) {
+				super.onDrawerClosed(view);
+				linearLayout.removeAllViews();
+				linearLayout.invalidate();
+			}
 
-		Todo todo8 = new Todo("Don't forget to call MOM", 0);
-		Todo todo9 = new Todo("Collect money from John", 0);
+			@Override
+			public void onDrawerSlide(View drawerView, float slideOffset) {
+				super.onDrawerSlide(drawerView, slideOffset);
+				if (slideOffset > 0.6 && linearLayout.getChildCount() == 0)
+					viewAnimator.showMenuContent();
+			}
 
-		Todo todo10 = new Todo("Post new Article", 0);
-		Todo todo11 = new Todo("Take database backup", 0);
+			/** Called when a drawer has settled in a completely open state. */
+			public void onDrawerOpened(View drawerView) {
+				super.onDrawerOpened(drawerView);
+			}
+		};
+		drawerLayout.setDrawerListener(drawerToggle);
+	}
 
-		// Inserting todos in db
-		// Inserting todos under "Shopping" Food
-		long todo1_id = db.createFood(todo1, new long[] { tag1_id });
-		long todo2_id = db.createFood(todo2, new long[] { tag1_id });
-		long todo3_id = db.createFood(todo3, new long[] { tag1_id });
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		drawerToggle.syncState();
+	}
 
-		// Inserting todos under "Watchlist" Food
-		long todo4_id = db.createFood(todo4, new long[] { tag3_id });
-		long todo5_id = db.createFood(todo5, new long[] { tag3_id });
-		long todo6_id = db.createFood(todo6, new long[] { tag3_id });
-		long todo7_id = db.createFood(todo7, new long[] { tag3_id });
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		drawerToggle.onConfigurationChanged(newConfig);
+	}
 
-		// Inserting todos under "Important" Food
-		long todo8_id = db.createFood(todo8, new long[] { tag2_id });
-		long todo9_id = db.createFood(todo9, new long[] { tag2_id });
 
-		// Inserting todos under "Androidhive" Food
-		long todo10_id = db.createFood(todo10, new long[] { tag4_id });
-		long todo11_id = db.createFood(todo11, new long[] { tag4_id });
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
 
-		Log.e("Todo Count", "Todo count: " + db.getToDoCount());
-
-		// "Post new Article" - assigning this under "Important" Food
-		// Now this will have - "Androidhive" and "Important" Tags
-		db.createTodoTag(todo10_id, tag2_id);
-
-		// Getting all tag names
-		Log.d("Get Tags", "Getting All Tags");
-
-		List<Food> allFoods = db.getAllTags();
-		for (Food food : allFoods) {
-			Log.d("Food Name", food.getTagName());
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+        Log.i("onOptionsItemSelected", "Onclick");
+		if (drawerToggle.onOptionsItemSelected(item)) {
+			return true;
 		}
-
-		// Getting all Todos
-		Log.d("Get Todos", "Getting All ToDos");
-
-		List<Todo> allToDos = db.getAllToDos();  // change to food
-		for (Todo todo : allToDos) {
-			Log.d("ToDo", todo.getNote());
+		switch (item.getItemId()) {
+			case R.id.action_settings:
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
+	}
 
-		// Getting todos under "Watchlist" tag name
-		Log.d("ToDo", "Get todos under single Food name");
+	private ScreenShotable replaceFragment(ScreenShotable screenShotable, int topPosition) {
+		this.res = this.res == R.drawable.content_music ? R.drawable.content_films : R.drawable.content_music;
+		View view = findViewById(R.id.content_frame);
+		int finalRadius = Math.max(view.getWidth(), view.getHeight());
+		SupportAnimator animator = ViewAnimationUtils.createCircularReveal(view, 0, topPosition, 0, finalRadius);
+		animator.setInterpolator(new AccelerateInterpolator());
+		animator.setDuration(ViewAnimator.CIRCULAR_REVEAL_ANIMATION_DURATION);
 
-		List<Todo> tagsWatchList = db.getAllToDosByTag(food3.getTagName());
-		for (Todo todo : tagsWatchList) {
-			Log.d("ToDo Watchlist", todo.getNote());
+		findViewById(R.id.content_overlay).setBackgroundDrawable(new BitmapDrawable(getResources(), screenShotable.getBitmap()));
+		animator.start();
+		ContentFragment contentFragment = ContentFragment.newInstance(this.res);
+		getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, contentFragment).commit();
+		return contentFragment;
+	}
+
+	@Override
+	public ScreenShotable onSwitch(Resourceble slideMenuItem, ScreenShotable screenShotable, int position) {
+        Log.i("ScreenShotable", "onSwitch : " + slideMenuItem.getName() + position);
+	    switch (slideMenuItem.getName()) {
+			case ContentFragment.CLOSE:
+				return screenShotable;
+			default:
+				return replaceFragment(screenShotable, position);
 		}
+	}
 
-		// Deleting a ToDo
-		Log.d("Delete ToDo", "Deleting a Todo");
-		Log.d("Food Count", "Food Count Before Deleting: " + db.getToDoCount());
+	@Override
+	public void disableHomeButton() {
+		getSupportActionBar().setHomeButtonEnabled(false);
 
-		db.deleteToDo(todo8_id);
+	}
 
-		Log.d("Food Count", "Food Count After Deleting: " + db.getToDoCount());
+	@Override
+	public void enableHomeButton() {
+		getSupportActionBar().setHomeButtonEnabled(true);
+		drawerLayout.closeDrawers();
 
-		// Deleting all Todos under "Shopping" tag
-		Log.d("Food Count",
-				"Food Count Before Deleting 'Shopping' Todos: "
-						+ db.getToDoCount());
+	}
 
-		db.deleteTag(food1, true);
+	@Override
+	public void addViewToContainer(View view) {
+		linearLayout.addView(view);
+	}
 
-		Log.d("Food Count",
-				"Food Count After Deleting 'Shopping' Todos: "
-						+ db.getToDoCount());
-
-		// Updating tag name
-		food3.setTagName("Movies to watch");
-		db.updateTag(food3);
-
-		// Don't forget to close database connection
-		db.closeDB();
-		
+	private ContentFragment createFragment(String iconName)
+	{
+		ContentFragment contentFragment = null;
+		switch (iconName)
+		{
+			case "Building":
+				contentFragment = MainFragment.newInstance();
+				break;
+            case "Book":
+                contentFragment = MainFragment.newInstance();
+                break;
+            case "Paint":
+                contentFragment = MainFragment.newInstance();
+                break;
+            case "Case":
+                contentFragment = MainFragment.newInstance();
+                break;
+            case "Shop":
+                contentFragment = MainFragment.newInstance();
+                break;
+            case "Party":
+                contentFragment = MainFragment.newInstance();
+                break;
+            case "Movie":
+                contentFragment = MainFragment.newInstance();
+                break;
+		}
+		return contentFragment;
 	}
 }
