@@ -18,6 +18,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.LinearLayout;
 
 import com.dedek.lelemas.fragment.ContentFragment;
+import com.dedek.lelemas.fragment.FoodFragment;
 import com.dedek.lelemas.fragment.MainFragment;
 import com.dedek.lelemas.helper.DatabaseHelper;
 
@@ -52,9 +53,9 @@ public class MainActivity extends AppCompatActivity implements ViewAnimator.View
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.content_frame, contentFragment)
 				.commit();
-		drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		drawerLayout = findViewById(R.id.drawer_layout);
 		drawerLayout.setScrimColor(Color.TRANSPARENT);
-		linearLayout = (LinearLayout) findViewById(R.id.left_drawer);
+		linearLayout = findViewById(R.id.left_drawer);
 		linearLayout.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements ViewAnimator.View
 
 
 	private void setActionBar() {
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		getSupportActionBar().setHomeButtonEnabled(true);
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -158,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements ViewAnimator.View
 		}
 	}
 
-	private ScreenShotable replaceFragment(ScreenShotable screenShotable, int topPosition) {
+	private ScreenShotable replaceFragment(ScreenShotable screenShotable, int topPosition, String slideMenuItemName) {
 		this.res = this.res == R.drawable.content_music ? R.drawable.content_films : R.drawable.content_music;
 		View view = findViewById(R.id.content_frame);
 		int finalRadius = Math.max(view.getWidth(), view.getHeight());
@@ -168,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements ViewAnimator.View
 
 		findViewById(R.id.content_overlay).setBackgroundDrawable(new BitmapDrawable(getResources(), screenShotable.getBitmap()));
 		animator.start();
-		ContentFragment contentFragment = ContentFragment.newInstance(this.res);
+		ContentFragment contentFragment = createFragment(slideMenuItemName);
 		getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, contentFragment).commit();
 		return contentFragment;
 	}
@@ -180,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements ViewAnimator.View
 			case ContentFragment.CLOSE:
 				return screenShotable;
 			default:
-				return replaceFragment(screenShotable, position);
+				return replaceFragment(screenShotable, position, slideMenuItem.getName());
 		}
 	}
 
@@ -202,31 +203,32 @@ public class MainActivity extends AppCompatActivity implements ViewAnimator.View
 		linearLayout.addView(view);
 	}
 
-	private ContentFragment createFragment(String iconName)
+	private ContentFragment createFragment(String slideMenuItemName)
 	{
 		ContentFragment contentFragment = null;
-		switch (iconName)
+		switch (slideMenuItemName)
 		{
 			case "Building":
-				contentFragment = MainFragment.newInstance();
+				contentFragment = ContentFragment.newInstance();
 				break;
             case "Book":
-                contentFragment = MainFragment.newInstance();
+                contentFragment = ContentFragment.newInstance();
                 break;
             case "Paint":
-                contentFragment = MainFragment.newInstance();
+                contentFragment = ContentFragment.newInstance();
                 break;
             case "Case":
-                contentFragment = MainFragment.newInstance();
+                contentFragment = ContentFragment.newInstance();
                 break;
             case "Shop":
-                contentFragment = MainFragment.newInstance();
+            	Log.i("MainActivity", "OnSwitch " + slideMenuItemName);
+				contentFragment = FoodFragment.newInstance();
                 break;
             case "Party":
-                contentFragment = MainFragment.newInstance();
+                contentFragment = ContentFragment.newInstance();
                 break;
             case "Movie":
-                contentFragment = MainFragment.newInstance();
+                contentFragment = ContentFragment.newInstance();
                 break;
 		}
 		return contentFragment;

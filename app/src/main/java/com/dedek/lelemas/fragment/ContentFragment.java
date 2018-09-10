@@ -29,7 +29,7 @@ public class ContentFragment extends Fragment implements ScreenShotable {
 
     private View containerView;
     protected ImageView mImageView;
-    protected int res;
+    //protected int res;
     private Bitmap bitmap;
 
     public static ContentFragment newInstance() {
@@ -54,17 +54,17 @@ public class ContentFragment extends Fragment implements ScreenShotable {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        res = getArguments().getInt(Integer.class.getName());
+        //res = getArguments().getInt(Integer.class.getName());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        mImageView = (ImageView) rootView.findViewById(R.id.image_content);
-        mImageView.setClickable(true);
-        mImageView.setFocusable(true);
-        mImageView.setImageResource(res);
+//        mImageView = (ImageView) rootView.findViewById(R.id.image_content);
+//        mImageView.setClickable(true);
+//        mImageView.setFocusable(true);
+//        mImageView.setImageResource(res);
         return rootView;
     }
 
